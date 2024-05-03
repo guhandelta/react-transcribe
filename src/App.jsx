@@ -111,6 +111,7 @@ function App() {
                 file={file}
                 audioStream={audioStream}
                 handleAudioReset={handleAudioReset}
+                handleFormSubmission={handleFormSubmission}
               />
             ) : (
               <HomePage 

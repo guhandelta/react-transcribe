@@ -9,7 +9,7 @@
 // };
 
 const FileDisplay = (props) => {
-    const { file, audioStream, handleAudioReset } = props;
+    const { file, audioStream, handleAudioReset, handleFormSubmission } = props;
 
     function generateFilename() {
 
