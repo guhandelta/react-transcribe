@@ -7,7 +7,7 @@ export default function Header(){
                 <h1 className="">
                 மொழி<span className="text-blue-400">பெயர்</span>
                 </h1>
-                <button className="flex items-center gap-2 special-button px-3 py-2 rounded-lg text-blue-400">
+                <button className="flex items-center gap-2 special-button px-3 text-sm py-2 rounded-lg text-blue-400">
                     <p>New</p>
                     <i className="fa-solid fa-plus"></i>
                 </button>
