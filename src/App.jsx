@@ -1,10 +1,12 @@
 import { useState } from 'react'
-import { FileDisplay, Header, HomePage } from './components'
+import { FileDisplay, Header, HomePage, Information, Transcribing } from './components'
 import './index.css'
 
 function App() {
   const [file, setFile] = useState(null);
   const [audioStream, setAudioStream] = useState(null);
+  const [output, setOutput] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const isAudioAvailale = file || audioStream;
 
@@ -17,7 +19,11 @@ function App() {
     <div className="flex flex-col p-4 max-4-[1000px]">
       <section className="min-h-screen flex flex-col">
         <Header />
-        { isAudioAvailale ? 
+        {output ? (
+          <Information />
+        ) : loading ? (
+          <Transcribing downloading={loading} />
+        ) : isAudioAvailale ? 
             (
               <FileDisplay
                 file={file}
