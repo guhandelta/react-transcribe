@@ -6,7 +6,7 @@ function App() {
   const [file, setFile] = useState(null);
   const [audioStream, setAudioStream] = useState(null);
   const [output, setOutput] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const isAudioAvailale = file || audioStream;
 
@@ -37,7 +37,6 @@ function App() {
               />
           )
         }
-        <main className="flex-1 p-4 flex flex-col justify-center">Sollunga.....</main>
       </section>
       <footer className=""></footer>
     </div>
