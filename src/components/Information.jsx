@@ -3,7 +3,7 @@ import Transcription from "./Transcription";
 import Translation from "./Translation";
 
 
-export default function Information() {
+export default function Information(props) {
 
     const [tab, setTab] = useState('transcription');
 
@@ -30,9 +30,9 @@ export default function Information() {
                 </button>
             </div>
             {tab === 'transcription' ? (
-                <Transcription />
+                <Transcription {...props} />
             ) : (
-                <Translation />
+                <Translation {...props} />
             )}
         </main>
     )

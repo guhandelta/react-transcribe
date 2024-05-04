@@ -1,7 +1,15 @@
-import React from 'react'
+/* eslint-disable react/prop-types */
 
-export default function Transcription() {
+
+export default function Transcription(props) {
+
+    const { output } = props;
+
     return (
-        <div>Transcription</div>
+        <div>
+            {output && (
+                <p>{output}</p>
+            )}
+        </div>
     )
 }

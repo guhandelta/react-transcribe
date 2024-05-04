@@ -32,7 +32,10 @@ const FileDisplay = (props) => {
             </div>
                 <div className="flex items-center justify-around gap-4">
                     <button className="text-slate-400">Reset</button>
-                    <button className="flex special-button px-3 p-2 rounded-lg text-blue-400 items-center gap-2 font-medium">
+                    <button 
+                        className="flex special-button px-3 p-2 rounded-lg text-blue-400 items-center gap-2 font-medium"
+                        onClick={handleFormSubmission}
+                    >
                         <p>Transcribe</p> 
                         <i className="fa-solid fa-pen-nib"></i>
                     </button>

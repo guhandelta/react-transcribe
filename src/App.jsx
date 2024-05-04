@@ -24,7 +24,7 @@ function App() {
   useEffect(() => {
     if(!worker.current){
       worker.current = new Worker(
-                          new URL('/utils/whisper.worker.js', import.meta.url), 
+                          new URL('./utils/whisper.worker.js', import.meta.url), 
                           { type: 'module' }
                         ); 
     }
@@ -42,7 +42,7 @@ function App() {
           break;
         case 'RESULT':
           setOutput(e.target.results);
-          console.log('Results...');
+          console.log('Results...:\t', e.data.results);
           break;
         case 'INFERENCE_DONE':
           setFinished(true);
@@ -65,29 +65,34 @@ function App() {
     const sampling_rate = 16000;
 
     /* Interface representing an audio-processing graph built from audio modules linked together, each represented by an AudioNode. An AudioContext controls both the creation of the nodes it contains and the execution of the audio processing, or decoding. 
-    The sampling rate is mentioned here to ensure that the audio processing happens at the defined sampling rate and that the audio is processed in a way that matches its source or the desired output format. */
-    const audioContext = new AudioContext({ sampleRate: sampling_rate });
+    The sampling rate is mentioned here to ensure that the audio processing happens at the defined sampling rate and that the audio is processed in a way that matches its source or the desired output format. 
+  ---const audioContext = new AudioContext({ sampleRate: sampling_rate });
 
-    // Read the entire file (expected to be an audio file) into memory as an ArrayBuffer. An ArrayBuffer is a generic, fixed-length container for binary data. They are used to represent a generic, fixed-length raw binary data buffer.
-    const res = await file.arrayBuffer();
+    Read the entire file (expected to be an audio file) into memory as an ArrayBuffer. An ArrayBuffer is a generic, fixed-length container for binary data. They are used to represent a generic, fixed-length raw binary data buffer.
+  ---const res = await file.arrayBuffer();
 
-    // The binary data in the ArrayBuffer is passed to decodeAudioData(), an asynchronous method of the AudioContext. This method decodes the audio data contained in the ArrayBuffer, effectively converting it into an AudioBuffer object. The AudioBuffer object stores data in an audio-specific format that makes it easier to process and analyze the audio.
-    const decodedAudio = await audioContext.decodeAudioData(res);
+    The binary data in the ArrayBuffer is passed to decodeAudioData(), an asynchronous method of the AudioContext. This method decodes the audio data contained in the ArrayBuffer, effectively converting it into an AudioBuffer object. The AudioBuffer object stores data in an audio-specific format that makes it easier to process and analyze the audio.
+  ---const decodedAudio = await audioContext.decodeAudioData(res);
 
-    /* Finally, getChannelData(0) extracts the audio data from the first channel of the AudioBuffer. Audio data is typically stored in channels (mono has one channel, stereo has two, etc.). The 0 here refers to the first channel, typically the left channel in stereo recordings or the only channel in mono recordings.
+    Finally, getChannelData(0) extracts the audio data from the first channel of the AudioBuffer. Audio data is typically stored in channels (mono has one channel, stereo has two, etc.). The 0 here refers to the first channel, typically the left channel in stereo recordings or the only channel in mono recordings.
     
     The returned value, audio, is a Float32Array representing the PCM (Pulse Code Modulation) data of the audio, where each sample point is a float describing the amplitude of the sound at that specific point in time.
+  ---const audio = decodedAudio.getChannelData(0);*/
 
-    */ 
-    const audio = decodedAudio.getChannelData(0);
-    return audio;
+  const audioCtx = new AudioContext({ sampleRate: sampling_rate })
+  const response = await file.arrayBuffer()
+  const decoded = await audioCtx.decodeAudioData(response)
+  const audio = decoded.getChannelData(0)
+  return audio
   }
 
   async function handleFormSubmission(){
-    if(!file && !audioStream) return;
-
-    let audio = await readAudioFrom(file ? file : audioStream);
-    const model_name = 'openai/whisper-tiny.en';
+    if (!file && !audioStream) { return }
+    file && console.log('File!........\t', file);
+    audioStream && console.log('Audio Stream!........\t', audioStream);
+    // let audio = await readAudioFrom(file ? file : audioStream)
+    let audio = await readAudioFrom(file ? file : audioStream )
+    const model_name = `openai/whisper-tiny.en`
 
     worker.current.postMessage({
       type: MessageTypes.INFERENCE_REQUEST,

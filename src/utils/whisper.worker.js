@@ -8,11 +8,11 @@ class MyTranscriptionPipeline{
     static instance = null
 
     // This fn() is really important as it will be used to communicate all the statuses with the main fn()
-    static async getInstance(progress_callback=null){
-        if(this.instance === null){
-            this.instance = await pipeline(this.task, null, { progress_callback } )
+    static async getInstance(progress_callback = null){
+        if (this.instance === null) {
+            this.instance = await pipeline(this.task, null, { progress_callback })
         }
-        // Instansiate if it does not exist
+        // Instantiate if it does not exist
         return this.instance
     }
 }
@@ -26,35 +26,6 @@ self.addEventListener('message', async (e) => {
     }
 });
 
-async function transcribe(audio){
-
-    sendLoadingMessage('loading');
-    
-    let pipeline 
-    try {
-        pipeline = await MyTranscriptionPipeline.getInstance(load_modal_callback);
-    } catch (error) {
-        console.log(error.message);
-    }
-    
-    sendLoadingMessage('success');
-
-    const stride_length_s = 5;
-
-    const generationTracker = new GenerationTracker(pipeline, stride_length_s);
-
-    await pipeline(audio,{
-        top_k: 0,
-        do_sample: false,
-        chunk_length: 30,
-        stride_length_s,
-        return_timestamps: true,
-        callback_function: generationTracker.callbackFunction.bind(generationTracker),
-        chunk_callback: generationTracker.chunkCallback.bind(generationTracker),
-    });
-
-    generationTracker.sendFinalResult();
-}
 
 async function load_modal_callback(data){
     const { status } = data;
@@ -81,20 +52,50 @@ async function sendDownloadingMessage( file, progress, loaded, total ){
     });
 }
 
+async function transcribe(audio) {
+    sendLoadingMessage('loading')
+    
+    let transcriptionPipeline;
+    try {
+        transcriptionPipeline = await MyTranscriptionPipeline.getInstance(load_modal_callback);
+    } catch (error) {
+        console.log(error.message);
+        return;  // Ensure to exit if there is an error during initialization
+    }
+    
+    sendLoadingMessage('success');
+
+    const stride_length_s = 5;
+    const generationTracker = new GenerationTracker(transcriptionPipeline, stride_length_s);
+
+    // Use the pipeline correctly
+    await transcriptionPipeline(audio, {
+        top_k: 0,
+        do_sample: false,
+        chunk_length: 30,
+        stride_length_s,
+        return_timestamps: true,
+        callback_function: generationTracker.callbackFunction.bind(generationTracker),
+        chunk_callback: generationTracker.chunkCallback.bind(generationTracker),
+    });
+
+    generationTracker.sendFinalResult();
+}
+
 class GenerationTracker{
     constructor(pipeline, stride_length_s){
-        this.pipeline = pipeline;
-        this.stride_length_s = stride_length_s;
-        this.chunks = [];
+        this.pipeline = pipeline
+        this.stride_length_s = stride_length_s
+        this.chunks = []
         this.time_precision = pipeline?.processor.feature_extractor.config.chunk_length / pipeline.model.config.max_source_positions
-        this.processed_chunks = [];
-        this.callbackFunctionCounter = 0;
+        this.processed_chunks = []
+        this.callbackFunctionCounter = 0
     }
     
     async sendFinalResult(){
         self.postMessage({
             type: MessageTypes.INFERENCE_DONE,
-        });
+        })
     }
 
     callbackFunction(beams){
@@ -118,6 +119,7 @@ class GenerationTracker{
 
     chunkCallback(data){
         this.chunks.push(data);
+        // eslint-disable-next-line no-unused-vars
         const [ text, { chunks } ] = this.pipeline.tokenizer._decode_asr(
             this.chunks,
             {
@@ -153,7 +155,6 @@ class GenerationTracker{
             end: Math.round(end) || Math.round(start + 0.9 * this.stride_length_s)
         };
     }
-    
 }
 
 function createResultMessage(results, isDone, completedUntilTimestamp){
